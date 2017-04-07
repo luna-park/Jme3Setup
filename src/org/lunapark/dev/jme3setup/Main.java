@@ -12,7 +12,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(getClass().getResource("layout/main_layout.fxml"));
         primaryStage.setResizable(false);
-        primaryStage.setTitle("jMonkey Engine project generator");
+        primaryStage.setTitle("jME3 project generator");
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
     }

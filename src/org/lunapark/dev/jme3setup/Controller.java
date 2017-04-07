@@ -18,9 +18,7 @@ public class Controller implements EventListener {
     public void onClick(ActionEvent actionEvent) {
         btnGenerate.setDisable(true);
         String sProjectName = tfName.getText();
-        String sName = sProjectName.toLowerCase();
         String sPackage = tfPackage.getText();
-//        System.out.println("Generate: " + sPackage + "." + sName);
         new Creator(sProjectName, sPackage, this);
     }
 

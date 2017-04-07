@@ -13,11 +13,11 @@ import java.io.PrintWriter;
 public class Creator {
 //    ProjectName /app/src/main/java/ com/package / sName
 
-    private final String appMask1 = "/app/src/main/java/";
-    private final String appMask2 = "/app/src/main/assets/";
-    private final String appMask3 = "/app/src/main/res/values/";
-    private final String appMask4 = "/app/src/main/";
-    private final String appMask5 = "/app/";
+    private final String appMaskSrc = "/app/src/main/java/";
+    private final String appMaskAssets = "/app/src/main/assets/";
+    private final String appMaskRes = "/app/src/main/res/values/";
+    private final String appMaskManifest = "/app/src/main/";
+    private final String appMaskGradle = "/app/";
     private final String coreMask = "/core/src/";
     private final String desktopMask = "/desktop/src/";
 
@@ -34,9 +34,9 @@ public class Creator {
 
 
     private final String fileDesktopLauncher = "package %s;\n\npublic class DesktopLauncher {\n\n    public static void main(String[] args) {\n        Game game = new Game();\n        game.start();\n    }\n}\n";
-    private final String fileGame = "package %s;\n\npublic class Game extends SimpleApplication {\n\n    public static void main(String[] args) {\n        Game app = new Game();\n        app.start();\n    }\n\n    @Override\n    public void simpleInitApp() {\n\n    }\n}\n";
+    private final String fileGame = "package %s;\n\nimport com.jme3.app.SimpleApplication;\n\npublic class Game extends SimpleApplication {\n\n    public static void main(String[] args) {\n        Game app = new Game();\n        app.start();\n    }\n\n    @Override\n    public void simpleInitApp() {\n\n    }\n}\n";
     private final String fileActivity = "package %s;\n\nimport com.jme3.app.AndroidHarness;\n\npublic class MainActivity extends AndroidHarness {\n\n    public MainActivity() {\n        // Set main project class (fully qualified path)\n        appClass = Game.class.getCanonicalName();\n        // Options\n    }\n}\n";
-    private final String fileManifest = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    package=\"%s\">\n\n    <application\n        android:allowBackup=\"true\"\n        android:icon=\"@mipmap/ic_launcher\"\n        android:label=\"@string/app_name\"\n        android:launchMode=\"singleTask\"\n        android:supportsRtl=\"true\"\n        android:theme=\"@style/AppTheme\">\n        <activity\n            android:name=\".MainActivity\"\n            android:screenOrientation=\"landscape\">\n            <intent-filter>\n                <action android:name=\"android.intent.action.MAIN\" />\n\n                <category android:name=\"android.intent.category.LAUNCHER\" />\n            </intent-filter>\n        </activity>\n    </application>\n\n</manifest>";
+    private final String fileManifest = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    package=\"%s\">\n\n    <application\n        android:allowBackup=\"true\"\n        \n        android:label=\"@string/app_name\"\n        android:launchMode=\"singleTask\"\n        android:supportsRtl=\"true\"\n        android:theme=\"@style/AppTheme\">\n        <activity\n            android:name=\".MainActivity\"\n            android:screenOrientation=\"landscape\">\n            <intent-filter>\n                <action android:name=\"android.intent.action.MAIN\" />\n\n                <category android:name=\"android.intent.category.LAUNCHER\" />\n            </intent-filter>\n        </activity>\n    </application>\n\n</manifest>";
     private final String fileStrings = "<resources>\n    <string name=\"app_name\">%s</string>\n</resources>\n";
     private final String fileStyles = "<resources>\n\n    <!-- Base application theme. -->\n    <style name=\"AppTheme\" parent=\"android:Theme.Holo.Light.DarkActionBar\">\n        <!-- Customize your theme here. -->\n    </style>\n\n</resources>";
     private final String fileGradleApp = "apply plugin: 'com.android.application'\n\nandroid {\n    compileSdkVersion 25\n    buildToolsVersion \"25.0.2\"\n    defaultConfig {\n        applicationId \"%s\"\n        minSdkVersion 15\n        targetSdkVersion 25\n        versionCode 1\n        versionName \"1.0\"\n        multiDexEnabled true\n    }\n    buildTypes {\n        release {\n            minifyEnabled false\n            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'\n        }\n    }\n}\n\ndependencies {\n    compile fileTree(dir: 'libs', include: ['*.jar'])\n}";
@@ -49,12 +49,15 @@ public class Creator {
     private String sPackageDirs;
 
     private EventListener eventListener;
+    private int count;
 
     public Creator(String sProjectName, String sPackageName, EventListener eventListener) {
         this.eventListener = eventListener;
-        // TODO Check strings for null etc
-        this.sProjectName = sProjectName;
-        this.sPackageName = sPackageName;
+        // Check strings for null etc
+        if (sProjectName.length() < 1) sProjectName = "MyGame";
+        if (sPackageName.length() < 1) sPackageName = "org.gamepackage";
+        this.sProjectName = sProjectName.trim();
+        this.sPackageName = sPackageName.trim();
         sName = sProjectName.toLowerCase();
         sPackageDirs = sPackageName.replace(".", "/");
         startTheDance();
@@ -62,13 +65,12 @@ public class Creator {
 
     private void startTheDance() {
         // Make dirs
-        // TODO If ProjectDir exist add index
+        // If ProjectDir exist add index
+        createRootDir(sProjectName);
 
-        createDirs(sProjectName);
-
-        String appSrcDir = sProjectName + appMask1 + sPackageDirs + "/" + sName;
+        String appSrcDir = sProjectName + appMaskSrc + sPackageDirs + "/" + sName;
         createDirs(appSrcDir);
-        String appResDir = sProjectName + appMask3 + sPackageDirs + "/" + sName;
+        String appResDir = sProjectName + appMaskRes;
         createDirs(appResDir);
 
         String coreSrcDir = sProjectName + coreMask + sPackageDirs + "/" + sName;
@@ -79,7 +81,7 @@ public class Creator {
 
         // Create assets dir
         for (String s : assetsDirs) {
-            createDirs(sProjectName + appMask2 + s);
+            createDirs(sProjectName + appMaskAssets + s);
         }
 
         // Create files
@@ -96,16 +98,30 @@ public class Creator {
 
         //// Android section
         createFile(appSrcDir + "/MainActivity.java", String.format(fileActivity, sPackageNameForFiles));
-        String sManifestPath = sProjectName + appMask4 + "AndroidManifest.xml";
+        String sManifestPath = sProjectName + appMaskManifest + "AndroidManifest.xml";
         createFile(sManifestPath, String.format(fileManifest, sPackageNameForFiles));
         createFile(appResDir + "/strings.xml", String.format(fileStrings, sProjectName));
         createFile(appResDir + "/styles.xml", fileStyles);
-        String sGradleAppPath = sProjectName + appMask5 + "build.gradle";
+        String sGradleAppPath = sProjectName + appMaskGradle + "build.gradle";
         createFile(sGradleAppPath, String.format(fileGradleApp, sPackageNameForFiles));
 
         // Mission Complete
-        eventListener.onEvent("Complete");
+        eventListener.onEvent("New -> Import Project ...");
         eventListener.complete();
+    }
+
+    private void createRootDir(String dirName) {
+        boolean dirCreated;
+        do {
+            dirCreated = new File(dirName).mkdir();
+            if (!dirCreated) {
+                count++;
+                dirName += String.valueOf(count);
+            }
+
+        } while (!dirCreated);
+
+        sProjectName = dirName;
     }
 
     private void createDirs(String sPath) {
