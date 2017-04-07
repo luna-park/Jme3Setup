@@ -2,7 +2,7 @@
 This tool generate project for Android Studio.
 
 # Usage
-1. Generate project.
+1. Run Jme3Setup.jar and generate project.
 2. Import into Android Studio: File -> New -> Import Project ...
 3. ...
 4. Profit.
